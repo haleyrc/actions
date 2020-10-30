@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -33,4 +34,10 @@ func main() {
 
 		fmt.Printf("  %s %s\n", filetype, file)
 	}
+
+	mainBytes, err := ioutil.ReadFile("main.go")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(mainBytes))
 }
