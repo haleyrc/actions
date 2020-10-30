@@ -1,0 +1,8 @@
+name: "experiment"
+description: "An action just for playing around with actions."
+
+runs:
+  using: composite
+  steps:
+    - run: go run main.go
+      shell: bash
