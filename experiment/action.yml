@@ -4,5 +4,6 @@ description: "An action just for playing around with actions."
 runs:
   using: composite
   steps:
+    - run: ls
     - run: go run main.go
       shell: bash
