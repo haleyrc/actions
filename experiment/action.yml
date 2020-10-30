@@ -4,9 +4,5 @@ description: "An action just for playing around with actions."
 runs:
   using: composite
   steps:
-    - run: ls
-      shell: bash
-    - run: pwd
-      shell: bash
     - run: go run ${{ github.action_path }}/main.go
       shell: bash
