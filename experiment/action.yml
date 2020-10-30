@@ -6,5 +6,7 @@ runs:
   steps:
     - run: ls
       shell: bash
+    - run: pwd
+      shell: bash
     - run: go run main.go
       shell: bash
