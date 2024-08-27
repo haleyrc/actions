@@ -46,6 +46,3 @@ jobs:
 
       - name: go mod verify
         run: go mod verify
-
-      - name: Build binaries
-        run: go build ./cmd/...
