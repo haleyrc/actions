@@ -1,0 +1,51 @@
+name: "Test"
+
+on:
+  workflow_call:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ">=1.22.0"
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: go test
+        run: go test -race ./...
+
+      - name: staticcheck
+        run: |
+          go install honnef.co/go/tools/cmd/staticcheck@latest
+          staticcheck ./...
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: gofmt
+        run: test -z $(gofmt -e -l -s .)
+
+      # Courtesy: https://github.com/fatih/color/blob/main/.github/workflows/go.yml
+      - name: go mod tidy
+        run: |
+          set -e
+          go mod tidy
+          output=$(git status -s)
+          if [ -z "${output}" ]; then
+            exit 0
+          fi
+          echo 'We wish to maintain a tidy state for go mod. Please run `go mod tidy` on your branch, commit and push again.'
+          echo 'Running `go mod tidy` on this CI test yields with the following changes:'
+          echo "$output"
+          exit 1
+
+      - name: go mod verify
+        run: go mod verify
+
+      - name: Build binaries
+        run: go build ./cmd/...
