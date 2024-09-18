@@ -7,42 +7,36 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    steps:
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: ">=1.22.0"
+    strategy:
+      matrix:
+        go: ['stable', 'oldstable']
 
-      - name: Checkout
+    steps:
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: go test
-        run: go test -race ./...
+      - name: Set Up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go }}
 
-      - name: staticcheck
-        run: |
-          go install honnef.co/go/tools/cmd/staticcheck@latest
-          staticcheck ./...
+      - name: Tidy
+        run: go mod tidy && git diff --exit-code
 
-      - name: go vet
+      - name: Download
+        run: go mod download
+
+      - name: Verify
+        run: go mod verify
+
+      - name: Format
+        run: gofmt -s -w . && git diff --exit-code
+
+      - name: Vet
         run: go vet ./...
 
-      - name: gofmt
-        run: test -z $(gofmt -e -l -s .)
+      - name: Build
+        run: go build -o /dev/null ./cmd/...
 
-      # Courtesy: https://github.com/fatih/color/blob/main/.github/workflows/go.yml
-      - name: go mod tidy
-        run: |
-          set -e
-          go mod tidy
-          output=$(git status -s)
-          if [ -z "${output}" ]; then
-            exit 0
-          fi
-          echo 'We wish to maintain a tidy state for go mod. Please run `go mod tidy` on your branch, commit and push again.'
-          echo 'Running `go mod tidy` on this CI test yields with the following changes:'
-          echo "$output"
-          exit 1
-
-      - name: go mod verify
-        run: go mod verify
+      - name: Test
+        run: go test -v -count=1 -shuffle=on ./...
